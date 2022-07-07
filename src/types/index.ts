@@ -8,8 +8,10 @@ export interface Film {
   backdrop_path?: string
 }
 
-export interface initialStateTypes {
+export interface InitialStateTypes {
   page:string
   currentMoviesGroup: MovieGroup
+  favoritefilms: string[] | [] | void
+  activeSearch:string
  
 }

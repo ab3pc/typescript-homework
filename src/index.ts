@@ -1,13 +1,28 @@
-import { fetchMovies } from "./api/api";
-import { Film, initialStateTypes } from "./types";
+import { renderFavoriteFilmItem, renderFilmItem } from './helpers/renderItems';
+import { fetchMovie, fetchMovieByName, fetchMovies } from "./api/api";
+import { clearContainer, handleOnFavClick } from "./helpers";
+import { checkFavoriteFilms } from "./helpers/addFilmToFavorite";
+import { Film, InitialStateTypes } from "./types";
 
 const filmContainer = document.getElementById('film-container');
 const buttonsWrapper = document.getElementById('button-wrapper');
 const loadMore = document.getElementById('load-more');
+const favoriteMovies = document.getElementById('favorite-movies');
+const searchBtn = document.getElementById('submit');
+const inputValue = document.getElementById('search');
 
-const initialState:initialStateTypes = {
+
+const initialState:InitialStateTypes = {
   page: '1',
-  currentMoviesGroup: 'popular'
+  currentMoviesGroup: 'popular',
+  favoritefilms: [],
+  activeSearch: ''
+}
+
+export async function render(): Promise<void> {
+  getFilms(initialState) 
+  getFavoriteFilms();
+ 
 }
 
 buttonsWrapper?.addEventListener('click', async (e) => {
@@ -15,17 +30,20 @@ buttonsWrapper?.addEventListener('click', async (e) => {
     switch (e.target?.id) {
       case 'upcoming': {
         initialState.currentMoviesGroup = 'upcoming'
-        getPopularFilms(initialState);     
+        initialState.page='1'
+        getFilms(initialState);     
         break;
     }
       case 'top_rated': {
         initialState.currentMoviesGroup = 'top_rated'
-        getPopularFilms(initialState)
+        initialState.page='1'
+        getFilms(initialState)
         break;
     }
       case 'popular': {
         initialState.currentMoviesGroup = 'popular'
-        getPopularFilms(initialState)
+        initialState.page='1'
+        getFilms(initialState)
         break;
     }
       default: return
@@ -36,62 +54,76 @@ buttonsWrapper?.addEventListener('click', async (e) => {
 
 loadMore?.addEventListener('click', () => {
   initialState.page= (+initialState.page + 1).toString();
-  getPopularFilms(initialState)
-
-  
+  if(initialState.activeSearch) {
+    searchByName(true)
+  } else getFilms(initialState) 
 })
 
 
+export async function getFilms(initialState:InitialStateTypes): Promise<void> {
+  if( initialState.activeSearch) {
+    initialState.activeSearch = '';
+    initialState.page = '1';
+    inputValue.value = '';
+  }
 
-export async function render(): Promise<void> {
-  getPopularFilms(initialState)
-}
 
-
-export async function getPopularFilms(initialState:initialStateTypes): Promise<void> {
-  
-  const films = await fetchMovies({movieGroup:initialState.currentMoviesGroup, page:initialState.page});
+    const films = await fetchMovies({movieGroup:initialState.currentMoviesGroup, page:initialState.page});
   if(initialState.page === '1') {
-    clearFilmsContainer();
+      if(filmContainer) clearContainer(filmContainer);
   }  
      films.forEach((item:Film) => {
       if(filmContainer) {
-        filmContainer.innerHTML += renderFilmItem(item);
+        filmContainer.innerHTML += renderFilmItem(item, initialState.favoritefilms);
          }
        })
-       console.log(initialState);
-     
+    
+}
+export async function getFavoriteFilms(): Promise<void> {
+  const favFilms =  checkFavoriteFilms();
+  initialState.favoritefilms = favFilms;
+  const favoriteFilms = await Promise.all(favFilms.map(async(film) => {
+    const item = await fetchMovie(film);
+    return item
+  })) 
+
+  favoriteFilms.reverse().forEach((item:Film) => {
+    if(favoriteMovies) {
+      favoriteMovies.innerHTML += renderFavoriteFilmItem(item);
+       }
+     })
+    
 }
 
+/*favorites */
+filmContainer?.addEventListener('click', handleOnFavClick);
+favoriteMovies?.addEventListener('click', handleOnFavClick);
+searchBtn?.addEventListener('click', () =>  searchByName(false))
 
+ async function searchByName (fetchMore:boolean): Promise<void> {
+  const filmName = inputValue.value;
+  initialState.activeSearch = 'search';
 
-export const clearFilmsContainer = ():void => {
-  if(filmContainer) {
-    filmContainer.innerHTML = '';
-   }
+  if(!fetchMore) {
+      if(filmName) {
+      initialState.page === '1';
+  }  else alert('please enter some text')
+ }
+
+   const films = await fetchMovieByName(filmName, initialState.page);
+ 
+    if(initialState.page === '1') {
+      if(filmContainer) clearContainer(filmContainer);
+  }  
+     films.forEach((item:Film) => {
+
+      if(filmContainer) {
+        filmContainer.innerHTML += renderFilmItem(item, initialState.favoritefilms);
+         }
+       })  
+
+  
+
 }
 
-const renderFilmItem = (item:Film):string => {
-  const filmItem = `<div class="col-lg-3 col-md-4 col-12 p-2">
-  <div class="card shadow-sm">
-      <img src="https://image.tmdb.org/t/p/original/${item.poster_path}">
-      <svg xmlns="http://www.w3.org/2000/svg" stroke="red" fill="red" width="50" height="50" class="bi bi-heart-fill position-absolute p-2" viewBox="0 -2 18 22">
-          <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"></path>
-      </svg>
-      <div class="card-body">
-          <p class="card-text truncate">
-              ${item.overview}
-          </p>
-          <div class="
-                  d-flex
-                  justify-content-between
-                  align-items-center
-              ">
-              <small class="text-muted">${item.release_date}</small>
-          </div>
-      </div>
-  </div>
-</div>`
-
-return filmItem
-}
+  

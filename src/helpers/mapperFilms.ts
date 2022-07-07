@@ -9,9 +9,20 @@ export const filmsMap = (arr:any):Film[] => {
       poster_path: item.poster_path,
       backdrop_path: item.backdrop_path,
     }
-        
-    return filmItem
+     return filmItem
   
   })
 return filmsArr
+}
+
+export const favFilmsMap = (item:any):Film => {
+
+     const filmItem = {
+      id: item.id,
+      release_date: item.release_date,
+      overview: item.overview,
+      poster_path: item.poster_path,
+      //backdrop_path: item.backdrop_path,
+    }
+     return filmItem
 }
