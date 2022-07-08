@@ -16,10 +16,11 @@ export const addFilmToFavorite = (id:string):void => {
 
 }
 
-export const checkFavoriteFilms = ():[] | void => {
+export const checkFavoriteFilms = ():string[] | [] => {
   const info = localStorage.getItem('favoriteMovies');
   if(info) {
     const items = JSON.parse(info);
     return items
   }
+  return []
 }

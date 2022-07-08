@@ -1,29 +1,41 @@
 import { getFavoriteFilms } from "..";
-import { addFilmToFavorite } from "./addFilmToFavorite";
+import { initialState } from "../..";
+import { addFilmToFavorite, checkFavoriteFilms } from "./addFilmToFavorite";
+import { getRandomFilm } from "./getRandomFilm";
+import { renderFavoriteFilmItem, renderFilmItem, renderRandomMovie } from './renderItems';
+import { searchByName, renderAfterSearch } from './searchByName';
 
-const favoriteMovies = document.getElementById('favorite-movies');
-
-export const clearContainer = (domElement:HTMLElement ):void => {
-  if(domElement) {
+export const clearContainer = (domElement: HTMLElement): void => {
+  if (domElement) {
     domElement.innerHTML = '';
-   }
+  }
 }
 
-
-export function handleOnFavClick(e:{target: Element}):void {
-  const elem = e?.target?.parentNode?.parentNode?.id
-  if(elem) {
-    addFilmToFavorite(elem); 
+export function handleOnFavClick(e: MouseEvent, container: HTMLElement | null): void {
+  const elem = (((e.target as HTMLElement).parentNode as HTMLElement).parentNode as HTMLElement).id
+  if (elem) {
+    addFilmToFavorite(elem);
   }
+  if (container) clearContainer(container)
+  getFavoriteFilms(initialState);
 
-  if(favoriteMovies) clearContainer(favoriteMovies)
-  getFavoriteFilms();
-
+  // handle opacity on heart-icon
   const currentOpacity = document.getElementById(elem)?.querySelector('svg');
-  if(currentOpacity) {
-    if(currentOpacity.getAttribute('opacity') === '1') {
+  if (currentOpacity) {
+    if (currentOpacity.getAttribute('opacity') === '1') {
       currentOpacity.setAttribute('opacity', '0.4')
     } else {
       currentOpacity.setAttribute('opacity', '1')
-    }}
+    }
   }
+}
+
+export {
+  getRandomFilm,
+  checkFavoriteFilms,
+  renderFavoriteFilmItem,
+  renderFilmItem,
+  renderRandomMovie,
+  searchByName,
+  renderAfterSearch
+};

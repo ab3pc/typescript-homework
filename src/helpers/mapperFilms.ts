@@ -1,9 +1,11 @@
-import { Film } from './../types/index';
+import { Film, Result, MovieType } from './../types/index';
 
-export const filmsMap = (arr:any):Film[] => {
-  const filmsArr:Film[] = arr.map((item:any) => {
+export const filmsMap = (arr:Result[]):Film[] => {
+  const filmsArr:Film[] = arr.map((item):Film => {
+   
     const filmItem = {
       id: item.id,
+      title: item.title,
       release_date: item.release_date,
       overview: item.overview,
       poster_path: item.poster_path,
@@ -15,8 +17,8 @@ export const filmsMap = (arr:any):Film[] => {
 return filmsArr
 }
 
-export const favFilmsMap = (item:any):Film => {
-
+export const favFilmsMap = (item:MovieType):Film => {
+  
      const filmItem = {
       id: item.id,
       release_date: item.release_date,
@@ -26,3 +28,4 @@ export const favFilmsMap = (item:any):Film => {
     }
      return filmItem
 }
+
