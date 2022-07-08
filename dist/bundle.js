@@ -3202,6 +3202,421 @@ function withinMaxClamp(min, value, max) {
 
 /***/ }),
 
+/***/ "./index.ts":
+/*!******************!*\
+  !*** ./index.ts ***!
+  \******************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "handleSearchByName": () => (/* binding */ handleSearchByName),
+/* harmony export */   "initialState": () => (/* binding */ initialState)
+/* harmony export */ });
+/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
+/* harmony import */ var bootstrap_dist_css_bootstrap_min_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! bootstrap/dist/css/bootstrap.min.css */ "./node_modules/bootstrap/dist/css/bootstrap.min.css");
+/* harmony import */ var _src_styles_styles_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./src/styles/styles.css */ "./src/styles/styles.css");
+/* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./src/index */ "./src/index.ts");
+/* harmony import */ var _src_helpers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./src/helpers */ "./src/helpers/index.ts");
+
+
+
+
+
+const buttonsWrapper = document.getElementById('button-wrapper');
+const loadMore = document.getElementById('load-more');
+const searchBtn = document.getElementById('submit');
+const filmContainer = document.getElementById('film-container');
+const favoriteMovies = document.getElementById('favorite-movies');
+const inputValue = document.getElementById('search');
+const initialState = {
+  page: '1',
+  currentMoviesGroup: 'popular',
+  favoritefilms: [],
+  activeSearch: ''
+};
+
+(async () => {
+  const data = await (0,_src_index__WEBPACK_IMPORTED_MODULE_3__.getFavoriteFilms)(initialState);
+  if (data) initialState.favoritefilms = data;
+})();
+
+(0,_src_index__WEBPACK_IMPORTED_MODULE_3__.getFilms)(initialState);
+buttonsWrapper === null || buttonsWrapper === void 0 ? void 0 : buttonsWrapper.addEventListener('click', async e => {
+  var _e$target;
+
+  if (e.target instanceof Element) {
+    switch ((_e$target = e.target) === null || _e$target === void 0 ? void 0 : _e$target.id) {
+      case 'upcoming':
+        {
+          initialState.currentMoviesGroup = 'upcoming';
+          break;
+        }
+
+      case 'top_rated':
+        {
+          initialState.currentMoviesGroup = 'top_rated';
+          break;
+        }
+
+      case 'popular':
+        {
+          initialState.currentMoviesGroup = 'popular';
+          break;
+        }
+
+      default:
+        return;
+    }
+
+    initialState.page = '1';
+    (0,_src_index__WEBPACK_IMPORTED_MODULE_3__.getFilms)(initialState);
+  }
+});
+loadMore === null || loadMore === void 0 ? void 0 : loadMore.addEventListener('click', () => {
+  initialState.page = (+initialState.page + 1).toString();
+  console.log(initialState);
+
+  if (initialState.activeSearch) {
+    handleSearchByName(true, initialState);
+  } else (0,_src_index__WEBPACK_IMPORTED_MODULE_3__.getFilms)(initialState);
+});
+/*favorites */
+
+filmContainer === null || filmContainer === void 0 ? void 0 : filmContainer.addEventListener('click', e => (0,_src_helpers__WEBPACK_IMPORTED_MODULE_4__.handleOnFavClick)(e, favoriteMovies));
+favoriteMovies === null || favoriteMovies === void 0 ? void 0 : favoriteMovies.addEventListener('click', e => (0,_src_helpers__WEBPACK_IMPORTED_MODULE_4__.handleOnFavClick)(e, favoriteMovies));
+/*search */
+
+searchBtn === null || searchBtn === void 0 ? void 0 : searchBtn.addEventListener('click', () => {
+  handleSearchByName(false, initialState);
+});
+async function handleSearchByName(mode, initialState) {
+  const datas = await (0,_src_helpers__WEBPACK_IMPORTED_MODULE_4__.searchByName)(mode, initialState, inputValue);
+  if (datas !== null && datas !== void 0 && datas.newInitialState.activeSearch) initialState.activeSearch = datas === null || datas === void 0 ? void 0 : datas.newInitialState.activeSearch;
+  const films = datas === null || datas === void 0 ? void 0 : datas.films;
+
+  if (films) {
+    (0,_src_helpers__WEBPACK_IMPORTED_MODULE_4__.renderAfterSearch)(films, initialState, filmContainer);
+  }
+}
+
+/***/ }),
+
+/***/ "./src/api/api.ts":
+/*!************************!*\
+  !*** ./src/api/api.ts ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "fetchMovie": () => (/* binding */ fetchMovie),
+/* harmony export */   "fetchMovieByName": () => (/* binding */ fetchMovieByName),
+/* harmony export */   "fetchMovies": () => (/* binding */ fetchMovies)
+/* harmony export */ });
+/* harmony import */ var _helpers_mapperFilms__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helpers/mapperFilms */ "./src/helpers/mapperFilms.ts");
+/* harmony import */ var _apiConfig__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./apiConfig */ "./src/api/apiConfig.ts");
+
+
+const fetchMovies = async _ref => {
+  let {
+    movieGroup = 'popular',
+    page = '1',
+    language = 'en-US'
+  } = _ref;
+  const response = await fetch("".concat(_apiConfig__WEBPACK_IMPORTED_MODULE_1__.apiConfig.serviceURL).concat(movieGroup, "?api_key=").concat(_apiConfig__WEBPACK_IMPORTED_MODULE_1__.apiConfig.apiKey, "&language=").concat(language, "&page=").concat(page));
+  const data = await response.json();
+  const filmsData = (0,_helpers_mapperFilms__WEBPACK_IMPORTED_MODULE_0__.filmsMap)(data.results);
+  return filmsData;
+};
+const fetchMovie = async id => {
+  const response = await fetch("".concat(_apiConfig__WEBPACK_IMPORTED_MODULE_1__.apiConfig.serviceURL).concat(id, "?api_key=").concat(_apiConfig__WEBPACK_IMPORTED_MODULE_1__.apiConfig.apiKey, "&language=en-US"));
+  const data = await response.json();
+  const filmsData = (0,_helpers_mapperFilms__WEBPACK_IMPORTED_MODULE_0__.favFilmsMap)(data);
+  return filmsData;
+};
+const fetchMovieByName = async function (name) {
+  let page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "1";
+  const response = await fetch("https://api.themoviedb.org/3/search/movie?api_key=".concat(_apiConfig__WEBPACK_IMPORTED_MODULE_1__.apiConfig.apiKey, "&language=en-US&query=").concat(name, "&page=").concat(page, "&include_adult=false"));
+  const data = await response.json();
+  const filmsData = (0,_helpers_mapperFilms__WEBPACK_IMPORTED_MODULE_0__.filmsMap)(data.results);
+  return filmsData;
+};
+
+/***/ }),
+
+/***/ "./src/api/apiConfig.ts":
+/*!******************************!*\
+  !*** ./src/api/apiConfig.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "apiConfig": () => (/* binding */ apiConfig)
+/* harmony export */ });
+const apiConfig = {
+  serviceURL: "https://api.themoviedb.org/3/movie/",
+  apiKey: "d3c703c438fd2150320afad4c85c10b8",
+  language: "en-US"
+};
+
+
+/***/ }),
+
+/***/ "./src/helpers/addFilmToFavorite.ts":
+/*!******************************************!*\
+  !*** ./src/helpers/addFilmToFavorite.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addFilmToFavorite": () => (/* binding */ addFilmToFavorite),
+/* harmony export */   "checkFavoriteFilms": () => (/* binding */ checkFavoriteFilms)
+/* harmony export */ });
+const addFilmToFavorite = id => {
+  const info = localStorage.getItem('favoriteMovies');
+
+  if (info) {
+    let items = JSON.parse(info);
+
+    if (items.includes(id)) {
+      items = items.filter(item => item !== id);
+      localStorage.setItem('favoriteMovies', JSON.stringify(items));
+      return;
+    }
+
+    items.push(id);
+    localStorage.setItem('favoriteMovies', JSON.stringify(items));
+  } else {
+    localStorage.setItem('favoriteMovies', JSON.stringify([id]));
+  }
+};
+const checkFavoriteFilms = () => {
+  const info = localStorage.getItem('favoriteMovies');
+
+  if (info) {
+    const items = JSON.parse(info);
+    return items;
+  }
+
+  return [];
+};
+
+/***/ }),
+
+/***/ "./src/helpers/getRandomFilm.ts":
+/*!**************************************!*\
+  !*** ./src/helpers/getRandomFilm.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getRandomFilm": () => (/* binding */ getRandomFilm)
+/* harmony export */ });
+const getRandomFilm = items => {
+  const rand = Math.floor(Math.random() * items.length);
+  return items[rand];
+};
+
+/***/ }),
+
+/***/ "./src/helpers/index.ts":
+/*!******************************!*\
+  !*** ./src/helpers/index.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "checkFavoriteFilms": () => (/* reexport safe */ _addFilmToFavorite__WEBPACK_IMPORTED_MODULE_2__.checkFavoriteFilms),
+/* harmony export */   "clearContainer": () => (/* binding */ clearContainer),
+/* harmony export */   "getRandomFilm": () => (/* reexport safe */ _getRandomFilm__WEBPACK_IMPORTED_MODULE_3__.getRandomFilm),
+/* harmony export */   "handleOnFavClick": () => (/* binding */ handleOnFavClick),
+/* harmony export */   "renderAfterSearch": () => (/* reexport safe */ _searchByName__WEBPACK_IMPORTED_MODULE_5__.renderAfterSearch),
+/* harmony export */   "renderFavoriteFilmItem": () => (/* reexport safe */ _renderItems__WEBPACK_IMPORTED_MODULE_4__.renderFavoriteFilmItem),
+/* harmony export */   "renderFilmItem": () => (/* reexport safe */ _renderItems__WEBPACK_IMPORTED_MODULE_4__.renderFilmItem),
+/* harmony export */   "renderRandomMovie": () => (/* reexport safe */ _renderItems__WEBPACK_IMPORTED_MODULE_4__.renderRandomMovie),
+/* harmony export */   "searchByName": () => (/* reexport safe */ _searchByName__WEBPACK_IMPORTED_MODULE_5__.searchByName)
+/* harmony export */ });
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! .. */ "./src/index.ts");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../.. */ "./index.ts");
+/* harmony import */ var _addFilmToFavorite__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./addFilmToFavorite */ "./src/helpers/addFilmToFavorite.ts");
+/* harmony import */ var _getRandomFilm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./getRandomFilm */ "./src/helpers/getRandomFilm.ts");
+/* harmony import */ var _renderItems__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./renderItems */ "./src/helpers/renderItems.ts");
+/* harmony import */ var _searchByName__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./searchByName */ "./src/helpers/searchByName.ts");
+
+
+
+
+
+
+const clearContainer = domElement => {
+  if (domElement) {
+    domElement.innerHTML = '';
+  }
+};
+function handleOnFavClick(e, container) {
+  var _document$getElementB;
+
+  const elem = e.target.parentNode.parentNode.id;
+
+  if (elem) {
+    (0,_addFilmToFavorite__WEBPACK_IMPORTED_MODULE_2__.addFilmToFavorite)(elem);
+  }
+
+  if (container) clearContainer(container);
+  (0,___WEBPACK_IMPORTED_MODULE_0__.getFavoriteFilms)(___WEBPACK_IMPORTED_MODULE_1__.initialState); // handle opacity on heart-icon
+
+  const currentOpacity = (_document$getElementB = document.getElementById(elem)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.querySelector('svg');
+
+  if (currentOpacity) {
+    if (currentOpacity.getAttribute('opacity') === '1') {
+      currentOpacity.setAttribute('opacity', '0.4');
+    } else {
+      currentOpacity.setAttribute('opacity', '1');
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/helpers/mapperFilms.ts":
+/*!************************************!*\
+  !*** ./src/helpers/mapperFilms.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "favFilmsMap": () => (/* binding */ favFilmsMap),
+/* harmony export */   "filmsMap": () => (/* binding */ filmsMap)
+/* harmony export */ });
+const filmsMap = arr => {
+  const filmsArr = arr.map(item => {
+    const filmItem = {
+      id: item.id,
+      title: item.title,
+      release_date: item.release_date,
+      overview: item.overview,
+      poster_path: item.poster_path,
+      backdrop_path: item.backdrop_path
+    };
+    return filmItem;
+  });
+  return filmsArr;
+};
+const favFilmsMap = item => {
+  const filmItem = {
+    id: item.id,
+    release_date: item.release_date,
+    overview: item.overview,
+    poster_path: item.poster_path //backdrop_path: item.backdrop_path,
+
+  };
+  return filmItem;
+};
+
+/***/ }),
+
+/***/ "./src/helpers/renderItems.ts":
+/*!************************************!*\
+  !*** ./src/helpers/renderItems.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "renderFavoriteFilmItem": () => (/* binding */ renderFavoriteFilmItem),
+/* harmony export */   "renderFilmItem": () => (/* binding */ renderFilmItem),
+/* harmony export */   "renderRandomMovie": () => (/* binding */ renderRandomMovie)
+/* harmony export */ });
+const renderFilmItem = (item, favoritefilms) => {
+  let isFavorite = 0.4;
+
+  if (item.id) {
+    if (favoritefilms.includes(item.id.toString())) isFavorite = 1;
+  }
+
+  const filmItem = "<div class=\"col-lg-3 col-md-4 col-12 p-2\">\n      <div class=\"card shadow-sm\" id=".concat(item.id, ">\n      <img src=\"https://image.tmdb.org/t/p/original/").concat(item.poster_path, "\">\n      <svg xmlns=\"http://www.w3.org/2000/svg\" stroke=\"red\" fill=\"red\" opacity=").concat(isFavorite, " width=\"50\" height=\"50\" class=\"bi bi-heart-fill position-absolute p-2\" viewBox=\"0 -2 18 22\">\n          <path style=\"cursor:pointer\"  fill-rule=\"evenodd\" d=\"M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z\"></path>\n      </svg>\n      <div class=\"card-body\">\n          <p class=\"card-text truncate\">\n              ").concat(item.overview, "\n          </p>\n          <div class=\"\n                  d-flex\n                  justify-content-between\n                  align-items-center\n              \">\n              <small class=\"text-muted\">").concat(item.release_date, "</small>\n          </div>\n      </div>\n  </div>\n</div>");
+  return filmItem;
+};
+const renderFavoriteFilmItem = item => {
+  const filmItem = "<div class=\"col-12 p-2\">\n  <div class=\"card shadow-sm\" id=".concat(item.id, ">\n      <img src=\"https://image.tmdb.org/t/p/original/").concat(item.poster_path, "\">\n      <svg xmlns=\"http://www.w3.org/2000/svg\" stroke=\"red\" fill=\"red\" width=\"50\" height=\"50\" class=\"bi bi-heart-fill position-absolute p-2\" viewBox=\"0 -2 18 22\">\n          <path style=\"cursor:pointer\" fill-rule=\"evenodd\" d=\"M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z\"></path>\n      </svg>\n      <div class=\"card-body\">\n          <p class=\"card-text truncate\">\n          ").concat(item.overview, "\n          </p>\n          <div class=\"\n                  d-flex\n                  justify-content-between\n                  align-items-center\n              \">\n              <small class=\"text-muted\">").concat(item.release_date, "</small>\n          </div>\n      </div>\n    </div>\n  </div>");
+  return filmItem;
+};
+const renderRandomMovie = (container, item) => {
+  container.style.background = "url(https://image.tmdb.org/t/p/original/".concat(item.backdrop_path, ") center center / cover no-repeat");
+  container.innerHTML = "<div class=\"row py-lg-5\">\n                    <div class=\"col-lg-6 col-md-8 mx-auto\" style=\"background-color: #2525258a\">\n                    <h1 id=\"random-movie-name\" class=\"fw-light text-light\">".concat(item.title, "</h1>\n                    <p style=\"min-height:200px;\" id=\"random-movie-description\" class=\"lead text-white\">\n                       ").concat(item.overview, "\n                    </p>\n                </div>\n            </div>");
+};
+
+/***/ }),
+
+/***/ "./src/helpers/searchByName.ts":
+/*!*************************************!*\
+  !*** ./src/helpers/searchByName.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "renderAfterSearch": () => (/* binding */ renderAfterSearch),
+/* harmony export */   "searchByName": () => (/* binding */ searchByName)
+/* harmony export */ });
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index */ "./src/helpers/index.ts");
+/* harmony import */ var _api_api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../api/api */ "./src/api/api.ts");
+/* harmony import */ var _renderItems__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./renderItems */ "./src/helpers/renderItems.ts");
+
+
+
+async function searchByName(fetchMore, initialState, inputElement) {
+  const filmName = inputElement.value; // return
+
+  initialState.activeSearch = 'search';
+
+  if (!fetchMore) {
+    if (filmName) {
+      initialState.page === '1';
+    } else {
+      alert('please enter some text');
+      return null;
+    }
+  }
+
+  const films = await (0,_api_api__WEBPACK_IMPORTED_MODULE_1__.fetchMovieByName)(filmName, initialState.page);
+  return {
+    newInitialState: initialState,
+    films: films
+  };
+}
+const renderAfterSearch = (films, initialState, filmContainer) => {
+  console.log(initialState); //TODO refactor
+  // if (initialState.page === '1') {
+  //   if (filmContainer) clearContainer(filmContainer);
+  // }
+
+  if (filmContainer) (0,_index__WEBPACK_IMPORTED_MODULE_0__.clearContainer)(filmContainer);
+  films.forEach(item => {
+    if (filmContainer && initialState.favoritefilms) {
+      filmContainer.innerHTML += (0,_renderItems__WEBPACK_IMPORTED_MODULE_2__.renderFilmItem)(item, initialState.favoritefilms);
+    }
+  });
+};
+
+/***/ }),
+
 /***/ "./src/index.ts":
 /*!**********************!*\
   !*** ./src/index.ts ***!
@@ -3211,10 +3626,100 @@ function withinMaxClamp(min, value, max) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "render": () => (/* binding */ render)
+/* harmony export */   "getFavoriteFilms": () => (/* binding */ getFavoriteFilms),
+/* harmony export */   "getFilms": () => (/* binding */ getFilms)
 /* harmony export */ });
-async function render() {// TODO render your app here
+/* harmony import */ var _api_api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api/api */ "./src/api/api.ts");
+/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./src/helpers/index.ts");
+
+
+const filmContainer = document.getElementById('film-container');
+const favoriteMovies = document.getElementById('favorite-movies');
+const inputValue = document.getElementById('search');
+const randomMovieContainer = document.getElementById('random-movie');
+async function getFilms(initialState) {
+  if (initialState.activeSearch) {
+    initialState.activeSearch = '';
+    initialState.page = '1';
+    inputValue.value = '';
+  }
+
+  const films = await (0,_api_api__WEBPACK_IMPORTED_MODULE_0__.fetchMovies)({
+    movieGroup: initialState.currentMoviesGroup,
+    page: initialState.page
+  });
+
+  if (initialState.page === '1') {
+    if (filmContainer) (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.clearContainer)(filmContainer);
+    const poster = (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.getRandomFilm)(films);
+
+    if (randomMovieContainer) {
+      (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.renderRandomMovie)(randomMovieContainer, poster);
+    }
+  }
+
+  films.forEach(item => {
+    if (filmContainer && initialState.favoritefilms) {
+      filmContainer.innerHTML += (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.renderFilmItem)(item, initialState.favoritefilms);
+    }
+  });
 }
+async function getFavoriteFilms(initialState) {
+  const favFilms = (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.checkFavoriteFilms)();
+  initialState.favoritefilms = favFilms;
+
+  if (favFilms) {
+    const favoriteFilms = await Promise.all(favFilms.map(async film => {
+      const item = await (0,_api_api__WEBPACK_IMPORTED_MODULE_0__.fetchMovie)(film);
+      return item;
+    }));
+    favoriteFilms.reverse().forEach(item => {
+      if (favoriteMovies) {
+        favoriteMovies.innerHTML += (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.renderFavoriteFilmItem)(item);
+      }
+    });
+  }
+
+  return initialState.favoritefilms;
+}
+
+/***/ }),
+
+/***/ "./node_modules/babel-polyfill/lib/index.js":
+/*!**************************************************!*\
+  !*** ./node_modules/babel-polyfill/lib/index.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+__webpack_require__(/*! core-js/shim */ "./node_modules/core-js/shim.js");
+
+__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/babel-polyfill/node_modules/regenerator-runtime/runtime.js");
+
+__webpack_require__(/*! core-js/fn/regexp/escape */ "./node_modules/core-js/fn/regexp/escape.js");
+
+if (__webpack_require__.g._babelPolyfill) {
+  throw new Error("only one instance of babel-polyfill is allowed");
+}
+__webpack_require__.g._babelPolyfill = true;
+
+var DEFINE_PROPERTY = "defineProperty";
+function define(O, key, value) {
+  O[key] || Object[DEFINE_PROPERTY](O, key, {
+    writable: true,
+    configurable: true,
+    value: value
+  });
+}
+
+define(String.prototype, "padLeft", "".padStart);
+define(String.prototype, "padRight", "".padEnd);
+
+"pop,reverse,shift,keys,values,entries,indexOf,every,some,forEach,map,filter,find,findIndex,includes,join,slice,concat,push,splice,unshift,sort,lastIndexOf,reduce,reduceRight,copyWithin,fill".split(",").forEach(function (key) {
+  [][key] && define(Array, key, Function.call.bind([][key]));
+});
 
 /***/ }),
 
@@ -19527,61 +20032,13 @@ module.exports = function (list, options) {
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-/*!**************************************************!*\
-  !*** ./node_modules/babel-polyfill/lib/index.js ***!
-  \**************************************************/
-
-
-__webpack_require__(/*! core-js/shim */ "./node_modules/core-js/shim.js");
-
-__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/babel-polyfill/node_modules/regenerator-runtime/runtime.js");
-
-__webpack_require__(/*! core-js/fn/regexp/escape */ "./node_modules/core-js/fn/regexp/escape.js");
-
-if (__webpack_require__.g._babelPolyfill) {
-  throw new Error("only one instance of babel-polyfill is allowed");
-}
-__webpack_require__.g._babelPolyfill = true;
-
-var DEFINE_PROPERTY = "defineProperty";
-function define(O, key, value) {
-  O[key] || Object[DEFINE_PROPERTY](O, key, {
-    writable: true,
-    configurable: true,
-    value: value
-  });
-}
-
-define(String.prototype, "padLeft", "".padStart);
-define(String.prototype, "padRight", "".padEnd);
-
-"pop,reverse,shift,keys,values,entries,indexOf,every,some,forEach,map,filter,find,findIndex,includes,join,slice,concat,push,splice,unshift,sort,lastIndexOf,reduce,reduceRight,copyWithin,fill".split(",").forEach(function (key) {
-  [][key] && define(Array, key, Function.call.bind([][key]));
-});
-})();
-
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-/*!******************!*\
-  !*** ./index.ts ***!
-  \******************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
-/* harmony import */ var bootstrap_dist_css_bootstrap_min_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! bootstrap/dist/css/bootstrap.min.css */ "./node_modules/bootstrap/dist/css/bootstrap.min.css");
-/* harmony import */ var _src_styles_styles_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./src/styles/styles.css */ "./src/styles/styles.css");
-/* harmony import */ var _src_index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./src/index */ "./src/index.ts");
-
-
-
-
-(0,_src_index__WEBPACK_IMPORTED_MODULE_3__.render)();
-})();
-
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	__webpack_require__("./node_modules/babel-polyfill/lib/index.js");
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./index.ts");
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=bundle.js.map
