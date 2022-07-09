@@ -22,7 +22,6 @@ export async function getFilms(initialState: InitialStateTypes): Promise<void> {
       renderRandomMovie(randomMovieContainer, poster)
     }
   }
- 
   films.forEach((item: Film) => {
     if (filmContainer && initialState.favoritefilms) {
       filmContainer.innerHTML += renderFilmItem(item, initialState.favoritefilms);
