@@ -8,9 +8,8 @@ interface SearchByNameReturnType {
   films: Film[] | []
 }
 
-export async function searchByName(fetchMore: boolean, initialState: InitialStateTypes, inputElement: HTMLElement): Promise<SearchByNameReturnType | null> {
+export async function searchByName(fetchMore: boolean, initialState: InitialStateTypes, inputElement: HTMLElement): Promise<SearchByNameReturnType | null | undefined> {
   const filmName = (inputElement as HTMLInputElement).value;
-  // return
   initialState.activeSearch = 'search';
 
   if (!fetchMore) {
@@ -22,18 +21,14 @@ export async function searchByName(fetchMore: boolean, initialState: InitialStat
     }
   }
   const films = await fetchMovieByName(filmName, initialState.page);
-  return { newInitialState: initialState, films: films }
+  if (films) return { newInitialState: initialState, films: films }
 }
 
 export const renderAfterSearch = (films: Film[], initialState: InitialStateTypes, filmContainer: HTMLElement): void => {
- console.log(initialState);
- //TODO refactor
-  // if (initialState.page === '1') {
-  //   if (filmContainer) clearContainer(filmContainer);
-  // }
-  if (filmContainer) clearContainer(filmContainer);
+  if (initialState.page === '1') {
+    if (filmContainer) clearContainer(filmContainer);
+  }
   films.forEach((item: Film) => {
-
     if (filmContainer && initialState.favoritefilms) {
       filmContainer.innerHTML += renderFilmItem(item, initialState.favoritefilms);
     }

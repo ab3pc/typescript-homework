@@ -1,9 +1,10 @@
-import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './src/styles/styles.css';
 import { getFilms, getFavoriteFilms } from './src/index';
 import { InitialStateTypes } from './src/types';
 import { handleOnFavClick, searchByName, renderAfterSearch } from './src/helpers';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './src/styles/styles.css';
+import { MovieGroup } from './src/types/index';
 
 const buttonsWrapper = document.getElementById('button-wrapper');
 const loadMore = document.getElementById('load-more');
@@ -26,36 +27,21 @@ export const initialState: InitialStateTypes = {
 
 getFilms(initialState);
 
+buttonsWrapper?.addEventListener('click', handleCategoriesButtonts)
 
-
-
-buttonsWrapper?.addEventListener('click', async (e) => {
+async function handleCategoriesButtonts(e:MouseEvent) {
   if (e.target instanceof Element) {
-
-    switch (e.target?.id) {
-      case 'upcoming': {
-        initialState.currentMoviesGroup = 'upcoming'
-        break;
-      }
-      case 'top_rated': {
-        initialState.currentMoviesGroup = 'top_rated'
-        break;
-      }
-      case 'popular': {
-        initialState.currentMoviesGroup = 'popular'
-        break;
-      }
-      default: return
+    const setCategories = (e.target?.id as MovieGroup);
+    initialState.currentMoviesGroup = setCategories; 
+    initialState.page = '1';
+    if(initialState.currentMoviesGroup) {
+      getFilms(initialState);
     }
-    initialState.page = '1'
-    getFilms(initialState);
   }
-
-})
+}
 
 loadMore?.addEventListener('click', () => {
   initialState.page = (+initialState.page + 1).toString();
-  console.log(initialState);
 
   if (initialState.activeSearch) {
     handleSearchByName(true, initialState)
@@ -76,6 +62,6 @@ export async function handleSearchByName(mode: boolean, initialState: InitialSta
   if (datas?.newInitialState.activeSearch) initialState.activeSearch = datas?.newInitialState.activeSearch;
   const films = datas?.films;
   if (films) {
-       renderAfterSearch(films, initialState, filmContainer)
+    renderAfterSearch(films, initialState, filmContainer)
   }
 }
